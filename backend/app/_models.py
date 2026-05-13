@@ -1,0 +1,3 @@
+# Importa todos os models para que o SQLAlchemy resolva os relacionamentos.
+# Use em scripts standalone (seeds, fixtures, CLI) antes de qualquer query.
+...
