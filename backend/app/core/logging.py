@@ -17,7 +17,7 @@ def setup_logging():
     )
 
     # Define o logger principal
-    logger = logging.getLogger("normatik")
+    logger = logging.getLogger("challenge_votacao")
     logger.info("Logging configurado com sucesso (Fator XI).")
     return logger
 

@@ -7,7 +7,7 @@ from app.core.settings import settings
 logger = logging.getLogger("worker")
 
 celery_app = Celery(
-    "normatik",
+    "challenge_votacao",
     broker=settings.REDIS_URL,
     backend=settings.REDIS_URL,
 )

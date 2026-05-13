@@ -25,10 +25,10 @@ services:
     restart: unless-stopped
     labels:
       - traefik.enable=true
-      - traefik.http.routers.normatik-web.rule=Host(`z3ndocs.uk`)
-      - traefik.http.routers.normatik-web.entrypoints=websecure
-      - traefik.http.routers.normatik-web.tls.certresolver=letsencrypt
-      - traefik.http.services.normatik-web.loadbalancer.server.port=80
+      - traefik.http.routers.challenge_votacao-web.rule=Host(`z3ndocs.uk`)
+      - traefik.http.routers.challenge_votacao-web.entrypoints=websecure
+      - traefik.http.routers.challenge_votacao-web.tls.certresolver=letsencrypt
+      - traefik.http.services.challenge_votacao-web.loadbalancer.server.port=80
       - traefik.docker.network=coracaodemae_traefik_network
 
   # ── API ───────────────────────────────────────────────────────────────────────
@@ -49,10 +49,10 @@ services:
     restart: unless-stopped
     labels:
       - traefik.enable=true
-      - traefik.http.routers.normatik-api.rule=Host(`api.z3ndocs.uk`)
-      - traefik.http.routers.normatik-api.entrypoints=websecure
-      - traefik.http.routers.normatik-api.tls.certresolver=letsencrypt
-      - traefik.http.services.normatik-api.loadbalancer.server.port=8000
+      - traefik.http.routers.challenge_votacao-api.rule=Host(`api.z3ndocs.uk`)
+      - traefik.http.routers.challenge_votacao-api.entrypoints=websecure
+      - traefik.http.routers.challenge_votacao-api.tls.certresolver=letsencrypt
+      - traefik.http.services.challenge_votacao-api.loadbalancer.server.port=8000
       - traefik.docker.network=coracaodemae_traefik_network
 
   # ── Celery Worker ─────────────────────────────────────────────────────────────
@@ -95,12 +95,12 @@ services:
     restart: unless-stopped
     labels:
       - traefik.enable=true
-      - traefik.http.routers.normatik-flower.rule=Host(`flower.z3ndocs.uk`)
-      - traefik.http.routers.normatik-flower.entrypoints=websecure
-      - traefik.http.routers.normatik-flower.tls.certresolver=letsencrypt
-      - traefik.http.routers.normatik-flower.middlewares=normatik-flower-auth
-      - traefik.http.services.normatik-flower.loadbalancer.server.port=5555
-      - "traefik.http.middlewares.normatik-flower-auth.basicauth.users=${FLOWER_BASICAUTH}"
+      - traefik.http.routers.challenge_votacao-flower.rule=Host(`flower.z3ndocs.uk`)
+      - traefik.http.routers.challenge_votacao-flower.entrypoints=websecure
+      - traefik.http.routers.challenge_votacao-flower.tls.certresolver=letsencrypt
+      - traefik.http.routers.challenge_votacao-flower.middlewares=challenge_votacao-flower-auth
+      - traefik.http.services.challenge_votacao-flower.loadbalancer.server.port=5555
+      - "traefik.http.middlewares.challenge_votacao-flower-auth.basicauth.users=${FLOWER_BASICAUTH}"
       - traefik.docker.network=coracaodemae_traefik_network
 
   # ── PostgreSQL ────────────────────────────────────────────────────────────────

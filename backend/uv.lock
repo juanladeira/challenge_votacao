@@ -1376,7 +1376,7 @@ wheels = [
 ]
 
 [[package]]
-name = "normatik"
+name = "challenge_votacao"
 version = "0.1.0"
 source = { editable = "." }
 dependencies = [
