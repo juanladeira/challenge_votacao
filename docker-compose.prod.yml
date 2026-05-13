@@ -1,0 +1,148 @@
+networks:
+  traefik_net:             # rede externa do Traefik compartilhado
+    external: true
+    name: coracaodemae_traefik_network
+  internal:                # banco, Redis, workers — sem exposição externa
+    driver: bridge
+
+volumes:
+  postgres_data:
+  minio_data:
+
+services:
+
+  # ── Frontend (Flutter Web) ───────────────────────────────────────────────────
+  frontend:
+    build:
+      context: .
+      dockerfile: compose/prod/frontend/Dockerfile
+      args:
+        API_URL: https://api.z3ndocs.uk
+    networks:
+      - traefik_net
+    depends_on:
+      - api
+    restart: unless-stopped
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.normatik-web.rule=Host(`z3ndocs.uk`)
+      - traefik.http.routers.normatik-web.entrypoints=websecure
+      - traefik.http.routers.normatik-web.tls.certresolver=letsencrypt
+      - traefik.http.services.normatik-web.loadbalancer.server.port=80
+      - traefik.docker.network=coracaodemae_traefik_network
+
+  # ── API ───────────────────────────────────────────────────────────────────────
+  api:
+    build:
+      context: .
+      dockerfile: compose/prod/api/Dockerfile
+    command: uv run uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers 2
+    env_file: .env.prod
+    networks:
+      - traefik_net
+      - internal
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    restart: unless-stopped
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.normatik-api.rule=Host(`api.z3ndocs.uk`)
+      - traefik.http.routers.normatik-api.entrypoints=websecure
+      - traefik.http.routers.normatik-api.tls.certresolver=letsencrypt
+      - traefik.http.services.normatik-api.loadbalancer.server.port=8000
+      - traefik.docker.network=coracaodemae_traefik_network
+
+  # ── Celery Worker ─────────────────────────────────────────────────────────────
+  celery-worker:
+    build:
+      context: .
+      dockerfile: compose/prod/api/Dockerfile
+    command: uv run celery -A app.core.celery worker --loglevel=info --concurrency=2
+    env_file: .env.prod
+    networks:
+      - internal
+    depends_on:
+      - redis
+      - postgres
+    restart: unless-stopped
+
+  # ── Celery Beat ───────────────────────────────────────────────────────────────
+  celery-beat:
+    build:
+      context: .
+      dockerfile: compose/prod/api/Dockerfile
+    command: uv run celery -A app.core.celery beat --loglevel=info
+    env_file: .env.prod
+    networks:
+      - internal
+    depends_on:
+      - redis
+    restart: unless-stopped
+
+  # ── Celery Flower (dashboard protegido) ───────────────────────────────────────
+  celery-flower:
+    image: mher/flower:2.0
+    environment:
+      CELERY_BROKER_URL: redis://redis:6379/0
+    networks:
+      - traefik_net
+      - internal
+    depends_on:
+      - redis
+    restart: unless-stopped
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.normatik-flower.rule=Host(`flower.z3ndocs.uk`)
+      - traefik.http.routers.normatik-flower.entrypoints=websecure
+      - traefik.http.routers.normatik-flower.tls.certresolver=letsencrypt
+      - traefik.http.routers.normatik-flower.middlewares=normatik-flower-auth
+      - traefik.http.services.normatik-flower.loadbalancer.server.port=5555
+      - "traefik.http.middlewares.normatik-flower-auth.basicauth.users=${FLOWER_BASICAUTH}"
+      - traefik.docker.network=coracaodemae_traefik_network
+
+  # ── PostgreSQL ────────────────────────────────────────────────────────────────
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - internal
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+  # ── Redis ─────────────────────────────────────────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    command: redis-server --save "" --appendonly no
+    networks:
+      - internal
+    restart: unless-stopped
+
+  # ── MinIO ─────────────────────────────────────────────────────────────────────
+  minio:
+    image: minio/minio:latest
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${S3_ACCESS_KEY}
+      MINIO_ROOT_PASSWORD: ${S3_SECRET_KEY}
+    volumes:
+      - minio_data:/data
+    networks:
+      - internal
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
