@@ -41,13 +41,13 @@ class Settings(BaseSettings):
 
     # E-mail (Mailpit em dev, SMTP real em prod)
     SMTP_HOST: str = "localhost"
-    SMTP_PORT: int = 1025
+    SMTP_PORT: int = 1026
     SMTP_USER: str = ""
     SMTP_PASSWORD: str = ""
     EMAIL_FROM: str = "noreply@challenge_votacao.com.br"
 
     # Storage S3 / MinIO
-    S3_ENDPOINT_URL: str = "http://localhost:9000"
+    S3_ENDPOINT_URL: str = "http://localhost:9020"
     S3_ACCESS_KEY: str = "minioadmin"
     S3_SECRET_KEY: str = "minioadmin"
     S3_BUCKET: str = "challenge_votacao"

@@ -58,7 +58,7 @@ services:
     environment:
       CELERY_BROKER_URL: redis://redis:6379/0
     ports:
-      - "5555:5555"
+      - "5556:5555"
     depends_on:
       - redis
     restart: unless-stopped
@@ -93,8 +93,8 @@ services:
   mailpit:
     image: axllent/mailpit:latest
     ports:
-      - "1025:1025"   # SMTP
-      - "8025:8025"   # UI web
+      - "1026:1025"   # SMTP
+      - "8026:8025"   # UI web
     restart: unless-stopped
 
   # ── MinIO (S3-compatible para PDFs e uploads) ─────────────────────────────────
@@ -105,8 +105,8 @@ services:
       MINIO_ROOT_USER: ${S3_ACCESS_KEY:-minioadmin}
       MINIO_ROOT_PASSWORD: ${S3_SECRET_KEY:-minioadmin}
     ports:
-      - "9000:9000"   # API S3
-      - "9001:9001"   # Console web
+      - "9020:9000"   # API S3
+      - "9021:9001"   # Console web
     volumes:
       - minio_data:/data
     healthcheck:
