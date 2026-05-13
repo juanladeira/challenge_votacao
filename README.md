@@ -48,12 +48,14 @@ O desenvolvimento foi dividido em fases estratégicas, cada uma isolada em sua p
 
 A aplicação conta com testes automatizados que validam os seguintes cenários:
 
-1.  **Listagem de Candidatos**: Garante que o endpoint `GET /candidatos` retorna a lista fixa corretamente.
-2.  **Voto com Sucesso**: Valida o registro de um voto válido no banco de dados.
-3.  **Bloqueio de Duplicidade (CPF)**: Garante que um mesmo CPF não pode votar mais de uma vez (Retorna `409 Conflict`).
-4.  **Candidato Inexistente**: Valida que votos para IDs de candidatos fora da lista fixa sejam rejeitados (Retorna `400 Bad Request`).
-5.  **Formato de CPF**: Valida se o CPF contém exatamente 11 dígitos numéricos via Pydantic (Retorna `422 Unprocessable Entity` para formatos inválidos).
-6.  **Agregação de Resultados**: Valida se o cálculo do total de votos e dos percentuais por candidato está correto e arredondado para duas casas decimais.
+1.  **Listagem de Candidatos**: Garante que o endpoint `GET /candidatos` retorna a lista fixa corretamente. [[Ver teste]](backend/tests/domains/test_votacao.py)
+2.  **Voto com Sucesso**: Valida o registro de um voto válido no banco de dados. [[Ver teste]](backend/tests/domains/test_votacao.py)
+3.  **Bloqueio de Duplicidade (CPF)**: Garante que um mesmo CPF não pode votar mais de uma vez (Retorna `409 Conflict`). [[Ver teste]](backend/tests/domains/test_votacao.py)
+4.  **Candidato Inexistente**: Valida que votos para IDs de candidatos fora da lista fixa sejam rejeitados (Retorna `400 Bad Request`). [[Ver teste]](backend/tests/domains/test_votacao.py)
+5.  **Formato de CPF**: Valida se o CPF contém exatamente 11 dígitos numéricos via Pydantic (Retorna `422 Unprocessable Entity` para formatos inválidos). [[Ver teste]](backend/tests/domains/test_votacao.py)
+6.  **Agregação de Resultados**: Valida se o cálculo do total de votos e dos percentuais por candidato está correto e arredondado para duas casas decimais. [[Ver teste]](backend/tests/domains/test_votacao.py)
+
+> Todos os testes de domínio podem ser encontrados em: [`backend/tests/domains/`](backend/tests/domains/)
 
 ---
 
