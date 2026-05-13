@@ -50,6 +50,17 @@ O desenvolvimento foi dividido em fases estratégicas, cada uma isolada em sua p
 - Refinamento da documentação do Swagger (`/docs`).
 - README final com instruções de execução.
 
+## 🛠️ Atalhos Úteis (Makefile)
+
+Para facilitar o desenvolvimento e a avaliação, o projeto inclui um `Makefile` com os comandos mais comuns:
+
+- `make up`: Sobe o ambiente completo em background.
+- `make logs`: Acompanha os logs da API.
+- `make test`: Executa a suíte de testes (pytest).
+- `make migrate-up`: Aplica as migrações no banco de dados.
+- `make shell`: Acessa o terminal dentro do container da API.
+- `make help`: Lista todos os comandos disponíveis.
+
 ---
 
 ## 🚀 Como Rodar o Projeto
