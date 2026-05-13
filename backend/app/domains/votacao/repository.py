@@ -4,7 +4,6 @@ from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.database import AsyncDBSession
 from app.domains.votacao.model import Voto
-from app.domains.votacao.schema import VotoCreate
 
 
 class VotacaoRepository:
@@ -16,8 +15,8 @@ class VotacaoRepository:
         result = await self._session.execute(query)
         return result.scalar_one_or_none()
 
-    async def create(self, voto_data: VotoCreate) -> Voto:
-        voto = Voto(cpf=voto_data.cpf, candidato_id=voto_data.candidato_id)
+    async def create_by_id(self, cpf: str, candidato_id: int) -> Voto:
+        voto = Voto(cpf=cpf, candidato_id=candidato_id)
         self._session.add(voto)
         await self._session.flush()
         return voto

@@ -22,8 +22,12 @@ class VotacaoService:
         return [CandidatoResponse(**c) for c in CANDIDATOS_FIXOS]
 
     async def registrar_voto(self, voto_data: VotoCreate) -> None:
-        # 1. Validar se o candidato existe
-        if not any(c["id"] == voto_data.candidato_id for c in CANDIDATOS_FIXOS):
+        # 1. Validar se o candidato existe pelo NÚMERO
+        candidato = next(
+            (c for c in CANDIDATOS_FIXOS if c["numero"] == voto_data.candidato_numero),
+            None,
+        )
+        if not candidato:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST, detail="Candidato inexistente"
             )
@@ -36,8 +40,10 @@ class VotacaoService:
                 detail="Este CPF já registrou um voto",
             )
 
-        # 3. Registrar o voto
-        await self._repository.create(voto_data)
+        # 3. Registrar o voto usando o ID interno para consistência no banco
+        await self._repository.create_by_id(
+            cpf=voto_data.cpf, candidato_id=candidato["id"]
+        )
 
     async def obter_resultados(self) -> ResultadoResponse:
         votos_por_candidato = await self._repository.get_vote_counts()
@@ -50,8 +56,8 @@ class VotacaoService:
 
             candidatos_resultado.append(
                 ResultadoCandidatoResponse(
-                    id=c["id"],
                     nome=c["nome"],
+                    numero=c["numero"],
                     votos=votos,
                     percentual=round(percentual, 2),
                 )

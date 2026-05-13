@@ -4,7 +4,7 @@ import re
 
 class VotoCreate(BaseModel):
     cpf: str = Field(..., description="CPF com exatamente 11 dígitos numéricos")
-    candidato_id: int
+    candidato_numero: int = Field(..., description="Número do candidato (ex: 13, 45)")
 
     @field_validator("cpf")
     @classmethod
@@ -15,14 +15,13 @@ class VotoCreate(BaseModel):
 
 
 class CandidatoResponse(BaseModel):
-    id: int
     nome: str
     numero: int
 
 
 class ResultadoCandidatoResponse(BaseModel):
-    id: int
     nome: str
+    numero: int
     votos: int
     percentual: float
 

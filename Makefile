@@ -1,4 +1,4 @@
-.PHONY: help up down restart logs shell test migrate-gen migrate-up clean
+.PHONY: help up down restart logs shell lint test cov migrate-gen migrate-up clean
 
 # Variáveis
 DOCKER_COMPOSE = docker compose
@@ -22,8 +22,15 @@ logs: ## Exibe os logs da API em tempo real
 shell: ## Abre um shell interativo no container da API
 	$(DOCKER_COMPOSE) exec $(API_SERVICE) /bin/bash
 
+lint: ## Executa a verificação de lint e formatação (ruff)
+	$(DOCKER_COMPOSE) exec $(API_SERVICE) uv run ruff check app tests alembic --fix
+	$(DOCKER_COMPOSE) exec $(API_SERVICE) uv run ruff format app tests alembic
+
 test: ## Executa os testes automatizados
 	$(DOCKER_COMPOSE) exec $(API_SERVICE) uv run pytest
+
+cov: ## Executa os testes com relatório de cobertura (coverage)
+	$(DOCKER_COMPOSE) exec $(API_SERVICE) uv run pytest --cov=app --cov-report=term-missing
 
 migrate-gen: ## Gera uma nova migração (uso: make migrate-gen m="nome_da_migracao")
 	$(DOCKER_COMPOSE) exec $(API_SERVICE) uv run alembic revision --autogenerate -m "$(m)"
