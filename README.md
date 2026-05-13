@@ -87,7 +87,7 @@ Para facilitar o desenvolvimento e a avaliação, o projeto inclui um `Makefile`
 
 3.  **Suba os containers:**
     ```bash
-    docker compose up -d api
+    make up
     ```
 
 4.  **Acesse a API:**
@@ -96,5 +96,29 @@ Para facilitar o desenvolvimento e a avaliação, o projeto inclui um `Makefile`
 
 5.  **Rodar os Testes:**
     ```bash
-    docker compose exec api uv run pytest
+    make test
     ```
+
+---
+
+## ⚖️ Estratégia de Escalabilidade (Milhões de Votos)
+
+Para escalar esta aplicação para milhões de votos, as seguintes evoluções arquiteturais seriam implementadas:
+
+### 1. Desacoplamento com Padrão Outbox + Celery
+Atualmente, o voto é gravado de forma síncrona. Em um cenário de alta carga:
+- O endpoint `/votos` apenas gravaria a intenção de voto e um evento na tabela de **Outbox** dentro da mesma transação.
+- Um worker **Celery** processaria essa fila em background para realizar tarefas pesadas (ex: analytics, notificações, auditoria).
+- Isso garante que a resposta ao usuário seja na ordem de milissegundos, independentemente do processamento posterior.
+
+### 2. Cache de Resultados com Redis
+O endpoint `/resultados` faz agregações no banco. Para milhões de votos:
+- Utilizaríamos o **Redis** para armazenar o resultado pré-calculado.
+- O cache seria invalidado ou atualizado de forma assíncrona (ex: a cada 10 segundos ou via stream de eventos), evitando sobrecarga no banco de dados relacional.
+
+### 3. Database Sharding e Réplicas de Leitura
+- **Réplicas de Leitura:** O tráfego de consulta de resultados seria direcionado para réplicas, deixando o banco primário apenas para inserções de votos.
+- **Sharding por CPF:** Divisão dos dados em múltiplos bancos de dados com base no hash do CPF, permitindo escala horizontal da camada de dados.
+
+### 4. Rate Limiting e Proteção
+- Implementação de limites de requisição por IP e por CPF na camada de infraestrutura (Nginx/Kong) para evitar ataques de negação de serviço (DDoS) e bots.
