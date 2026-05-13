@@ -33,7 +33,7 @@ class Settings(BaseSettings):
     ADMIN_DEFAULT_USERNAME: str = "admin"
     ADMIN_DEFAULT_PASSWORD: str = "admin"
 
-        # Criptografia de campos sensíveis (Fernet)
+    # Criptografia de campos sensíveis (Fernet)
     ENCRYPTION_KEY: str = Field(default="")
 
     # Redis (Celery broker + rate limit)

@@ -1,11 +1,12 @@
 import pytest
 from httpx import ASGITransport, AsyncClient
-from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
+from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
 from app.core.database import Base, get_db
 from app.core.settings import settings
 from app.main import app
 
 TEST_DATABASE_URL = settings.DATABASE_URL
+
 
 @pytest.fixture(scope="function")
 async def engine():
@@ -17,15 +18,18 @@ async def engine():
         await conn.run_sync(Base.metadata.drop_all)
     await engine.dispose()
 
+
 @pytest.fixture
 async def db_session(engine):
     Session = async_sessionmaker(engine, expire_on_commit=False)
     async with Session() as session:
         yield session
 
+
 @pytest.fixture
 async def client(db_session):
     """Cria um cliente HTTP para os testes com override de DB."""
+
     async def override_get_db():
         yield db_session
 
