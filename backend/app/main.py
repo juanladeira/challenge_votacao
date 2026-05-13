@@ -1,14 +1,17 @@
 from contextlib import asynccontextmanager
+from http import HTTPStatus
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request, status
+from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 
 from app.core.logging import logger
 from app.core.settings import settings
 from app.domains.votacao.router import router as votacao_router
 
-# Importa todos os models para que o Base.metadata os conheça
-import app.domains.votacao.model  # noqa: F401
+# Importa o centralizador de modelos para registro no Base.metadata
+import app._models  # noqa: F401
 
 
 @asynccontextmanager
@@ -25,6 +28,20 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request: Request, exc: RequestValidationError):
+    """Transforma erros complexos do Pydantic em mensagens simples."""
+    # Pega apenas a primeira mensagem de erro para simplificar a resposta
+    error = exc.errors()[0]
+    msg = error.get("msg", "Erro de validação").replace("Value error, ", "")
+
+    return JSONResponse(
+        status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+        content={"detail": msg},
+    )
+
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -36,6 +53,11 @@ app.add_middleware(
 app.include_router(votacao_router)
 
 
-@app.get("/health")
+@app.get(
+    "/health",
+    status_code=HTTPStatus.OK,
+    tags=["Core"],
+    description="Endpoint para verificação de saúde do serviço.",
+)
 async def health():
     return {"status": "ok"}
