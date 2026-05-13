@@ -36,19 +36,39 @@ O desenvolvimento foi dividido em fases estratégicas, cada uma isolada em sua p
 - Implementação de Health-check e estabilização do núcleo da API.
 - Documentação inicial e limpeza de arquivos residuais (`.env.example`, scripts).
 
-### **Fase 2: Implementação do Domínio de Votação**
-- Criação das 5 camadas do domínio `votacao`.
-- Implementação das regras de negócio (unicidade de CPF, validação de candidatos fixos).
-- Cálculos de resultados e percentuais.
+### **Fase 2: Implementação e Validação (Finalizada)**
+- Implementação completa do domínio `votacao` (Model, Schema, Repository, Service e Router).
+- Gerenciamento de persistência com migrações Alembic (tabela `votos`).
+- Implementação de uma suíte de testes robusta cobrindo 100% das regras de negócio.
+- Criação de atalhos via `Makefile` para produtividade.
 
-### **Fase 3: Persistência e Migrações**
-- Geração das revisões do Alembic para a tabela de votos.
-- Execução e validação da estrutura no PostgreSQL.
+---
 
-### **Fase 4: Qualidade e Entrega Final**
-- Implementação de testes unitários e de integração.
-- Refinamento da documentação do Swagger (`/docs`).
-- README final com instruções de execução.
+## 🧪 Cenários de Teste
+
+A aplicação conta com testes automatizados que validam os seguintes cenários:
+
+1.  **Listagem de Candidatos**: Garante que o endpoint `GET /candidatos` retorna a lista fixa corretamente. [[Ver teste]](backend/tests/domains/test_votacao.py)
+2.  **Voto com Sucesso**: Valida o registro de um voto válido no banco de dados. [[Ver teste]](backend/tests/domains/test_votacao.py)
+3.  **Bloqueio de Duplicidade (CPF)**: Garante que um mesmo CPF não pode votar mais de uma vez (Retorna `409 Conflict`). [[Ver teste]](backend/tests/domains/test_votacao.py)
+4.  **Candidato Inexistente**: Valida que votos para IDs de candidatos fora da lista fixa sejam rejeitados (Retorna `400 Bad Request`). [[Ver teste]](backend/tests/domains/test_votacao.py)
+5.  **Formato de CPF**: Valida se o CPF contém exatamente 11 dígitos numéricos via Pydantic (Retorna `422 Unprocessable Entity` para formatos inválidos). [[Ver teste]](backend/tests/domains/test_votacao.py)
+6.  **Agregação de Resultados**: Valida se o cálculo do total de votos e dos percentuais por candidato está correto e arredondado para duas casas decimais. [[Ver teste]](backend/tests/domains/test_votacao.py)
+
+> Todos os testes de domínio podem ser encontrados em: [`backend/tests/domains/`](backend/tests/domains/)
+
+---
+
+## 🛠️ Atalhos Úteis (Makefile)
+
+Para facilitar o desenvolvimento e a avaliação, o projeto inclui um `Makefile` com os comandos mais comuns:
+
+- `make up`: Sobe o ambiente completo em background.
+- `make logs`: Acompanha os logs da API.
+- `make test`: Executa a suíte de testes (pytest).
+- `make migrate-up`: Aplica as migrações no banco de dados.
+- `make shell`: Acessa o terminal dentro do container da API.
+- `make help`: Lista todos os comandos disponíveis.
 
 ---
 

@@ -10,7 +10,7 @@ from alembic import context
 # Importa todos os models para que o autogenerate os detecte
 from app.core.database import Base
 from app.core.settings import settings
-import app.domains.outbox.model  # noqa: F401
+import app.domains.votacao.model  # noqa: F401
 
 config = context.config
 
